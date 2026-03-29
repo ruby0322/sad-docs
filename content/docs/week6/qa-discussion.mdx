@@ -43,11 +43,11 @@ Docker Hub 免費帳戶有以下主要限制：
 
 ## Docker Compose 常見問題與答疑
 
-### Q1: Docker Compose 和 Docker Swarm/Kubernetes 有什麼區別？
+### Q1: Docker Compose 和編排工具（如 Swarm、Kubernetes）有什麼區別？
 
-- **Docker Compose**: 主要用於本地開發和測試環境，管理單主機上的多容器
-- **Docker Swarm**: Docker 內建的集群管理和編排工具，適合中小型項目
-- **Kubernetes**: 功能更強大的容器編排平台，適合大型複雜系統，支持自動擴展、負載均衡等高級功能
+- **Docker Compose**：多半用於**單一 Docker 主機**上的多容器開發與簡易部署（`docker compose up`）。
+- **Docker Swarm**：Docker 內建**叢集**模式，可用 `docker stack deploy` 在多節點跑服務；見 [Docker Swarm 與 Stack](/docs/week6/docker-swarm)。
+- **Kubernetes**：功能與生態最完整的大型編排平台，適合複雜 Production；與容器關係可參考 [雲端原生簡介](/docs/week6/cloud-native)。
 
 ### Q2: Docker Compose 的服務啟動順序問題如何解決？
 
@@ -78,51 +78,9 @@ services:
 
 最佳實踐：
 1. 使用環境變數和 .env 檔案（不要提交到版本控制）
-2. 使用 Docker Secrets（在 Swarm 模式下）
+2. 使用 Docker Secrets（在 [Swarm](/docs/week6/docker-swarm) 模式下）
 3. 使用外部密鑰管理服務，如 HashiCorp Vault
 4. 區分開發和生產環境的配置
-
-## Docker Swarm 與 Stack
-
-### Q1: Docker Swarm 能解決哪些生產環境問題？
-
-Docker Swarm 可以解決的關鍵問題：
-- **零停機更新**：應用更新時不會導致服務中斷
-- **自動負載平衡**：在多個節點間分配流量
-- **高可用性**：如果一個節點失敗，服務會自動遷移到健康節點
-- **服務發現**：自動處理服務間的連接和通信
-- **滾動更新**：逐步更新服務，控制更新速度和健康狀態監控
-
-### Q2: Docker Swarm 的基本架構是什麼？
-
-Docker Swarm 採用主從架構：
-- **Manager Nodes**：負責編排和管理集群狀態
-- **Worker Nodes**：運行應用容器的工作節點
-- **Services**：定義應用程式的行為和需求
-- **Tasks**：分配給各 Worker Nodes 的工作單位（容器實例）
-
-這種架構允許應用程式在多個節點上運行多個副本，提高可用性和性能。
-
-### Q3: 如何使用 Docker Swarm 進行零停機部署？
-
-基本步驟：
-```bash
-# 初始化 Swarm
-docker swarm init
-
-# 部署應用 Stack
-docker stack deploy -c docker-compose.yml todo-app
-
-# 更新服務（零停機）
-# 更新 docker-compose.yml 文件後，再次執行
-docker stack deploy -c docker-compose.yml todo-app
-
-# 查看服務狀態
-docker service ls
-
-# 擴展服務實例數
-docker service scale todo-app_frontend=3
-```
 
 ## SSH 與遠端部署常見問題與答疑
 
@@ -312,24 +270,20 @@ PasswordAuthentication no
 
 ## 總結與回顧
 
-### 本週回顧 (Week 2)
+### 本週回顧（第六週）
 
 - **Docker 進階概念**：Docker Registry、版本標籤管理
-- **Docker Compose**：簡化多容器應用管理
-  - `docker-compose.yml` 的撰寫
-  - `docker-compose up`, `down`, `logs`, `ps` 等指令
-- **SSH 與遠端部署**：
-  - SSH 連線到遠端伺服器
-  - 在伺服器上使用 Git 和 Docker Compose 部署應用
-  - 透過公網 IP 存取應用
-- **雲端原生簡介**：了解容器化應用在雲端環境運行的基本概念和好處
+- **Docker Compose**：簡化多容器應用管理（`docker-compose.yml`、`up`／`down`／`logs`／`ps`）
+- **Docker Swarm 與 Stack**（選讀）：多節點叢集、`docker stack deploy`、滾動更新——見 [專章](/docs/week6/docker-swarm)
+- **SSH 與遠端部署**：連線、在伺服器上用 Git／Compose 部署、透過公網存取服務
+- **雲端原生簡介**：容器、微服務與編排的基本概念
 
-### 下週課程預告
+### 後續課程預告（第十一週）
 
-下週我們將探討：
+全學期下一個主題單元為 **第十一週：DevOps**，將與本週容器／部署能力銜接，重點包括：
 
-1. **資料庫選型**：介紹各種不同的資料庫，幫助你理解技術選型與架構設計的大概念
-2. **OpenAPI**：API 文件自動化生成，現代化 API 開發流程與最佳實踐
-3. **實作**：基本的 API 文件，並使用 Postman 測試 API
+1. **測試計畫與策略**（[測試計畫](/docs/week11/test-plan)）
+2. **Jest 單元測試**、**Playwright E2E**（[單元測試](/docs/week11/unit-tests)、[E2E](/docs/week11/e2e-tests)）
+3. **GitHub Actions**：在 push／PR 時自動跑測試與 CI（[GitHub Actions](/docs/week11/github)）
 
-這些主題將幫助你更好地理解現代應用架構中的數據層和 API 設計，為更複雜的系統開發打下基礎。
+先鞏固本週映像、Compose 與（若實作）遠端部署，第十一週再把「可重複驗證」的流程掛進版控與自動化。

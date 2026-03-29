@@ -43,7 +43,7 @@ Docker Compose 是一個用來**定義和執行多容器 Docker 應用程式**�
 - **快速啟動/停止**：一鍵管理整個應用程式堆疊
 - **易於擴展**：方便地增加或修改服務
 
-> 現在 Docker Compose 已經是 Docker 的一部分，也進化到可以與 Docker Swarm、Stack 等更複雜的架構整合
+> 現在 Docker Compose 已整合在 Docker CLI 中。若要將相同風格的設定部署到**多節點叢集**與滾動更新，可另學 [Docker Swarm 與 Stack](/docs/week6/docker-swarm)。
 
 ## docker-compose.yml 基本結構
 
@@ -294,60 +294,6 @@ docker-compose down
 docker-compose down -v
 ```
 
-## Docker Swarm & Stack - 進階主題
-
-Docker Compose 非常適合本地開發和簡單部署，但對於更複雜的生產環境，我們可能需要更強大的工具。Docker Swarm 提供了集群管理和服務編排功能。
-
-### 為什麼需要 Docker Swarm？
-
-想像一下，你的應用程式需要更新：
-- 如果直接停止舊版本再啟動新版本，會造成服務中斷
-- 如果有多個使用者同時使用，這會造成不好的體驗
-- 如果更新出問題，需要快速 Rollback
-
-Docker Swarm 可以幫你實現：
-- 零停機時間更新（Downtime-free updates）
-- 自動負載平衡（Load balancing）
-- 故障自動轉移（Failover）
-- 服務自動擴展（Auto-scaling）
-
-### Docker Swarm 架構
-
-```
-                    [Load Balancer]
-                           │
-                           ▼
-                    [Manager Node]
-                           │
-        ┌────────────┬────┴─────┬────────────┐
-        ▼            ▼           ▼            ▼
-[Worker Node]  [Worker Node] [Worker Node] [Worker Node]
-```
-
-當你要更新應用程式時：
-1. Swarm 會先啟動新版本的容器
-2. 確認新容器健康後，才關閉舊容器
-3. 如果新版本有問題，可以立即回滾
-4. 整個過程使用者無感
-
-### Docker Swarm 常用指令
-
-```bash
-# 初始化 Swarm
-docker swarm init
-
-# 部署 stack（零停機更新）
-docker stack deploy -c docker-compose.yml todo-app
-
-# 查看服務狀態
-docker service ls
-
-# 擴展服務數量（增加 Availability + Load Balancing）
-docker service scale todo-app_frontend=3
-```
-
-> 雖然 Docker Swarm 可以處理基本的零停機部署，但在需要更複雜的部署策略時，可以考慮使用 Kubernetes。
-
 ## 小結
 
 通過本單元的學習，你應該已經掌握了：
@@ -356,9 +302,8 @@ docker service scale todo-app_frontend=3
 - docker-compose.yml 檔案的結構和常用配置選項
 - 如何使用 Docker Compose 部署多服務應用
 - Docker Compose 的常用命令
-- Docker Swarm 的基本概念和使用場景
 
-下一個單元，我們將學習如何使用 SSH 將 Docker 容器化應用部署到遠端伺服器。
+若要在**多台機器**上做叢集編排與滾動更新，可接續閱讀 [Docker Swarm 與 Stack](/docs/week6/docker-swarm)。接下來也建議配合 [SSH 與遠端部署](/docs/week6/ssh-deploy)，將 Compose 或映像部署到實際伺服器。
 
 ## 延伸閱讀與參考資料
 

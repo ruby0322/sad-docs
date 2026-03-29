@@ -10,6 +10,7 @@
     "docker",
     "docker-registry",
     "docker-compose",
+    "docker-swarm",
     "ssh-deploy",
     "qa-discussion"
   ]

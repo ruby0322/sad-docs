@@ -1,0 +1,127 @@
+---
+title: Docker Swarm 與 Stack
+description: 叢集編排、零停機更新與 docker stack deploy
+icon: Network
+---
+
+## 為什麼需要容器編排（Container Orchestration）？
+
+在單機上用 [Docker Compose](/docs/week6/docker-compose) 啟動多個容器，對開發與簡單部署已很好用；但一旦進入**多台機器、要長期對外提供服務**的場景，只靠人工到各台主機執行 `docker run`，很快就會遇到：
+
+- **要跑幾個副本、誰來維持這個數量？** 機器掛點或容器崩潰後，能否自動在別台拉起？
+- **發佈新版本時**能不能**滾動更新**，避免一次全關造成長時間中斷？出問題能否**快速回滾**？
+- **服務之間**在跨主機時如何**連線、名稱解析與負載分散**，而不必手動記 IP？
+
+這些問題的共同點是：你需要一層軟體依「**期望狀態**」（要跑哪些服務、幾個副本、用哪個映像）去**排程、監看、重試與更新**——也就是 **容器編排**。沒有編排，容器化仍可行，但**規模、可靠度與維運成本**通常難以在生產環境長期支撐。
+
+## Kubernetes（K8s）與其他編排方案
+
+滿足上述需求的作法在業界多半依賴**編排平台**。**Kubernetes**（常簡寫 **K8s**）是其中**最主流、生態最大**的開源框架之一：透過叢集自動調度 Pod、服務發現、滾動更新、水平擴展、設定與機密管理等，許多企業與雲廠商都以 K8s（或基於 K8s 的受管服務）作為標準架構——日後你若接觸後端或 DevOps，幾乎一定會在文件與職缺中頻繁看到它。
+
+但 K8s **概念與元件多**（控制平面、Pod、Deployment、Service、Ingress、Helm……），**學習曲線陡**，也需為熟悉其 API 與操作方式預留時間；同一門課裡要同時把 Docker／Compose 打穩、又把 K8s 講透，往往吃不下。
+
+**因此考量本課程目標與時程**，本單元仍以**較貼近既有 Docker 工具鏈、入門負擔較輕**的 **Docker Swarm** 為主軸：處理的仍是「多節點叢集、副本、滾動更新」等同類問題，但指令與整體心智模型相對精簡，適合先建立**編排與叢集**的第一層直覺；若你熟練之後想往業界標準前進，文末附有 **K8s 參考資料**供課後延伸。
+
+在 [Docker Compose](/docs/week6/docker-compose) 中，我們在**單一主機**上以 `docker-compose.yml` 管理多容器應用。**Docker Swarm** 則是 Docker 內建的**叢集（cluster）模式**：把多台機器組成一個 Swarm，用與 Compose 相容的檔案，以 **`docker stack deploy`** 在多台節點上宣告服務，並支援滾動更新、擴充副本等。
+
+> 編排、微服務與雲原生的更大圖像，也可對照 [雲端原生簡介](/docs/week6/cloud-native)。
+
+## Docker Swarm 能協助達成什麼？
+
+承接上文對「更新與可用度」的需求，若仍採用**整批停舊再起新**的方式，往往會有**服務空窗**；在有多人使用時體驗更差，且需要**Rollback** 時也更難控管。Swarm 可協助落實例如：
+
+- **零停機時間更新**（rolling update）
+- **負載平衡**（在多個副本間分散流量）
+- **故障轉移**（節點失效時調度任務）
+- **調整服務副本數**（scale）
+
+## Docker Swarm 架構
+
+```
+                    [Load Balancer]
+                           │
+                           ▼
+                    [Manager Node]
+                           │
+        ┌────────────┬────┴─────┬────────────┐
+        ▼            ▼           ▼            ▼
+[Worker Node]  [Worker Node] [Worker Node] [Worker Node]
+```
+
+更新應用時的典型流程概念：
+
+1. 先啟動新版本容器（或新任務）
+2. 健康檢查通過後，再下線舊任務
+3. 若新版有問題，可**回滾**到前一版
+4. 對使用者盡量維持連線與可用性
+
+## 常用指令
+
+```bash
+# 在目前機器初始化 Swarm（成為 manager）
+docker swarm init
+
+# 以 Compose 檔部署 Stack（檔名可為 docker-compose.yml）
+docker stack deploy -c docker-compose.yml todo-app
+
+# 查看服務
+docker service ls
+
+# 調整某服務副本數（例如前端 3 個實例）
+docker service scale todo-app_frontend=3
+```
+
+修改 `docker-compose.yml` 後，可再次執行 **`docker stack deploy -c ...`** 以觸發**滾動更新**（實際行為依檔案中 `deploy` 等設定而定）。
+
+> 教學環境若僅單機練習，仍可 `swarm init` 後在同一台跑 stack，體驗指令與服務模型；生產環境通常會有多台 manager／worker 與負載平衡。
+
+## 與 Docker Compose 的關係
+
+- **Compose（`docker compose up`）**：習慣上多為**單 Docker 主機**，開發與簡單部署最常用。
+- **Swarm Stack（`docker stack deploy`）**：在 **Swarm 叢集**上宣告服務，適合**多節點**與內建編排需求；可沿用熟悉的 YAML 結構，並加上 Swarm 相關的 `deploy` 區塊（若需要）。
+
+更細的 Stack 檔案與 `deploy` 選項見 [Compose file deploy 參考](https://docs.docker.com/reference/compose-file/deploy/)（與引擎／Swarm 版本有關，請以官方文件為準）。
+
+## FAQ 補充
+
+### Swarm 能解決哪些生產議題？
+
+- **滾動／零停機更新**：降低發版時中斷時間  
+- **負載分散**：多副本時由 Swarm 內建路由  
+- **高可用**：節點故障時調度任務到其他節點  
+- **服務發現**：同一 overlay 網路內以服務名稱解析  
+
+### 節點角色為何？
+
+- **Manager**：維持叢集狀態、排程服務（也可執行工作負載，視設定而定）  
+- **Worker**：執行被分派的任務（容器）  
+- **Service**：希望的服務樣態（映像、副本數、更新策略等）  
+- **Task**：實際在某一節點上跑的容器實例  
+
+### 零停機部署的大致步驟？
+
+```bash
+docker swarm init
+docker stack deploy -c docker-compose.yml todo-app
+# 修改 yml 後再次 deploy 以觸發更新
+docker stack deploy -c docker-compose.yml todo-app
+docker service ls
+docker service scale todo-app_frontend=3
+```
+
+## 小結
+
+- Swarm 提供**多節點**上的服務編排，並可與 Compose 風格的檔案搭配 **Stack** 部署。  
+- 單機開發仍以 **Docker Compose** 為主；要上叢集與滾動更新，本課程以 **Swarm** 為實作主軸；日後若面向大型團隊與複雜平台，再深入 **Kubernetes** 即可與業界實務對齊。
+
+## 延伸閱讀（Docker Swarm）
+
+- [Docker Swarm 概念](https://docs.docker.com/engine/swarm/)
+- [docker stack deploy](https://docs.docker.com/reference/cli/docker/stack/deploy/)
+
+## Kubernetes（K8s）參考資料（課後延伸）
+
+- [What is Kubernetes?](https://kubernetes.io/docs/concepts/overview/what-is-kubernetes/) — 官方說明：K8s 在做什麼、為什麼需要它  
+- [Kubernetes Basics](https://kubernetes.io/docs/tutorials/kubernetes-basics/) — 官方互動式入門  
+- [CNCF Glossary - Kubernetes](https://glossary.cncf.io/kubernetes/) — CNCF 詞彙表：K8s 在雲原生脈絡中的定位  
+- [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/) — 控制平面與節點元件總覽（較進階，適合讀完 Swarm 後對照）
