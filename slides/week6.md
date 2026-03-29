@@ -1,13 +1,13 @@
 ---
 marp: true
 paginate: true
-footer: "系統設計與分析 SAD 113-2"
+footer: "系統設計與分析 SAD 114-2"
 lang: zh-TW
 ---
 
-# 系統設計與分析 SAD 113-2
+# 系統設計與分析 SAD 114-2
 
-## 第 13 週課程：Docker Compose & 初探雲端原生部署
+## 第 6 週課程：Docker, Docker Compose & Cloud Native
 
 ### 助教：葉又銘、顧寬証，教授：盧信銘
 
@@ -16,15 +16,16 @@ lang: zh-TW
 
 ## 上週回顧 & 本週議程
 
-### 上週 (Week 12) 重點 
-Git 版本控制與 GitHub 協作, Docker 基礎：Dockerfile, Image, Container, 自動化測試：單元測試 (Jest), E2E 測試 (Playwright), CI/CD 概念與 GitHub Actions 實作
+### 上週（第三週）重點
+
+Git 版本控制與 GitHub 協作（分支、PR、基本指令與流程）
 
 > 我們也根據上週的回饋，將實作內容改為助教引導式的實作，讓大家能夠更輕鬆地跟上進度。
 
 
 ---
 
-### 本週 (Week 13) 議程
+### 本週（第六週）議程
 - **Docker 進階概念**：Why Registry? Types of Registries (Docker Hub, GitHub CR, Cloud CRs)
 - **Docker Compose**：多服務協作, `docker-compose.yml` (Structure, Example, Common Configs, Q&A)
 - **實作**：使用 Docker Compose 運行 Todo App
@@ -847,7 +848,7 @@ ssh your_username@server_ip_address "ls -la /tmp"
 
 ## 總結與下一步
 
-### 本週回顧 (Week 13)
+### 本週回顧（第六週）
 - **Docker 進階概念**：了解為何需要 Registry，以及不同 Registry 的類型 (Docker Hub, GitHub CR, Cloud Provider Registries)。
 - **Docker Compose**：簡化多容器應用管理 (`docker-compose.yml` 結構與常用配置, SADo 範例, 服務依賴, Q&A)。
 - **Docker Swarm & Stack**：初步了解集群管理、零停機更新、負載平衡、擴展概念、架構與常用指令。
@@ -860,10 +861,10 @@ ssh your_username@server_ip_address "ls -la /tmp"
 
 ---
 
-### 下一週 (Week 14) 預告
-- **資料庫選型**：介紹各種不同的資料庫 (SQL vs NoSQL, 常用資料庫如 PostgreSQL, MySQL, MongoDB, Redis)，帶大家理解技術選型與架構設計的大概念。
-- **OpenAPI (Swagger)**：API 文件標準與自動化生成，現代化 API 開發流程與 Best Practices。
-- **實作**：使用工具撰寫基本的 OpenAPI 文件，並使用 Postman/Insomnia 測試 API。
+### 下一週（第十一週）預告
+- **測試計畫與測試金字塔**：單元測試、E2E 測試的角色與取捨。
+- **Jest 單元測試**、**Playwright E2E 測試**：撰寫與執行自動化測試。
+- **GitHub Actions**：以 workflow 在 push / PR 時跑測試與基本 CI。
 
 ---
 

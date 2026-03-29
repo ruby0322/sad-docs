@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   //  get path from request
   const path = request.nextUrl.pathname;
   if (path === "/docs") {
-    return NextResponse.redirect(new URL("/docs/week1", request.nextUrl));
+    return NextResponse.redirect(new URL("/docs/week3", request.nextUrl));
   }
   return NextResponse.next();
 }

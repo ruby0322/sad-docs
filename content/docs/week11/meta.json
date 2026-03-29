@@ -1,0 +1,14 @@
+{
+  "root": true,
+  "title": "第十一週",
+  "description": "DevOps：單元測試、Playwright、GitHub Actions",
+  "icon": "Activity",
+  "pages": [
+    "index",
+    "test-plan",
+    "unit-tests",
+    "manual-tests",
+    "e2e-tests",
+    "github"
+  ]
+}

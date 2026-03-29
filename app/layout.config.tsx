@@ -19,14 +19,14 @@ export const baseOptions: BaseLayoutProps = {
         >
           <circle cx={12} cy={12} r={12} fill="currentColor" />
         </svg>
-        SAD 113-2 課程手冊
+        SAD 114-2 課程手冊
       </>
     ),
   },
   links: [
     {
       text: "GitHub",
-      url: "https://github.com/113-2-SAD/SADo",
+      url: "https://github.com/114-2-SAD/SADo",
       external: true,
     },
   ],

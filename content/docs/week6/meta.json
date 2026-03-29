@@ -1,0 +1,16 @@
+{
+  "root": true,
+  "title": "第六週",
+  "description": "容器（Docker、Docker Compose）與雲端原生",
+  "icon": "Container",
+  "pages": [
+    "index",
+    "review-week3",
+    "docker",
+    "docker-registry",
+    "docker-compose",
+    "cloud-native",
+    "ssh-deploy",
+    "qa-discussion"
+  ]
+}

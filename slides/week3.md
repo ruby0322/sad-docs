@@ -1,518 +1,439 @@
 ---
 marp: true
 paginate: true
-footer: "系統設計與分析 SAD 113-2"
+footer: "系統設計與分析 SAD 114-2"
 lang: zh-TW
 ---
 
-# 系統設計與分析 SAD 113-2
+# 系統設計與分析 SAD 114-2
 
-## 第 14 週課程：資料庫選型 & OpenAPI
+## 第三週課程：Version Control、Git 與 GitHub
 
-### 助教：葉又銘、顧寬証　|　教授：盧信銘
-
----
-<!-- Review of Week 13 -->
-# 上週回顧 (Week 13)
-
-- **Docker 進階**：Registry、映像管理
-- **Docker Compose**：多容器協調、服務依賴
-- **Docker Swarm & Stack**：集群部署、零停機更新
-- **SSH 遠端部署**：SSH 金鑰、`scp` 傳輸、指令自動化
-- **Cloud Native** 概念：容器、微服務、CI/CD、DevOps
-
-> ▶︎ **實作回顧**：使用 Docker Compose 部署 Todo App，並透過 SSH 上線至遠端伺服器。
-
-
----
-<!-- Agenda -->
-# 本週內容 (Week 14)
-
-1. **資料庫選型**：理論、實務與案例
-2. **進階資料庫設計概念**
-3. **OpenAPI (Swagger)**：Design‑First API 開發
-4. **實作時間**：撰寫並測試 OpenAPI 文件
-5. **總結與期末提醒**
-
----
-# 資料庫選型 (Database Selection)
+### 助教：葉又銘、顧寬証，教授：盧信銘
 
 ---
 
-## 資料庫不只有  Relational Database！
+## 課程目標
 
-上學期很多人應該都有修過資料庫，但我們僅停留在 Relational Database...
+根據學期初的表單回饋，我們將著重於軟體開發流程、系統設計、DevOps 概念。
 
-但其實還有超多類型的資料庫，分別負責各種資訊系統開發場景！
-
-* **關聯式 (SQL)**：PostgreSQL、MySQL、MariaDB、Oracle、SQL Server
-* **文件型 (Document)**：MongoDB、CouchDB、RavenDB
-* **鍵值型 (Key-Value)**：Redis、Memcached、DynamoDB
-* **列式 (Column-Family)**：Cassandra、HBase、ScyllaDB
-* **圖形 (Graph)**：Neo4j、ArangoDB、JanusGraph
-* **時序 (Time-Series)**：InfluxDB、TimescaleDB、Prometheus
-* **搜尋引擎 (Search)**：Elasticsearch、Solr、Meilisearch
-
+![stats](stats.png)
 
 ---
 
-## 資料庫是系統設計中最主要的一環
+### 第三週（今天）
 
-在軟體工程師的職涯中，系統設計面試是常見的挑戰。
+- **Git**：版本控制、分支與協作流程
+- **GitHub**：遠端儲存庫、Pull Request、Code Review
+- 安裝環境與 Fork **Todo App**，完成基本版控實作
 
-深入理解不同類型資料庫的特性和應用場景，不僅能幫助你在面試中脫穎而出，更能為你提供構建可擴展、高效能系統的關鍵知識。
+### 第六週
 
-選擇合適的資料庫架構，往往是決定系統成敗的重要因素。
+- **Docker / Docker Compose**、**Registry**、多服務編排
+- **雲端原生**概念與 **SSH 部署**
 
----
+### 第十一週
 
-例如：設計一個 TikTok 這樣的影音社交平台，需要同時運用：
-- **關聯式資料庫**：用戶資料、關係、權限管理
-- **文件型資料庫**：動態內容、評論、互動記錄
-- **搜尋引擎**：影片標題、描述、標籤的全文檢索
-- **快取系統**：熱門影片、推薦列表的即時存取
-
-> 所以資料庫遠比你想像的還要複雜！
-
-
----
-## 為什麼資料庫選型重要？
-
-資料庫會影響各種資源的運用與效能，例如：
-
-* **資料怎麼存**：怎麼使用越少的資源存取越多的資料？
-* **跑得快不快**：怎麼存取決定回應速度與可擴展性？
-* **好不好開發**：是否有開發體驗與複雜度？
-* **花錢多不多**：還要考慮學習、維運與雲端成本...
-* **未來好不好改**：因為資料量通常龐大，遷移代價通常極高...
-
-> **重點**：沒有「最好」，只有「最適合」你需求的資料庫。
-
----
-## SQL vs NoSQL：兩大陣營
-
-| **特性** | **SQL (關聯式)** | **NoSQL (非關聯式)** |
-| --- | --- | --- |
-| 資料結構 | Schema‑on‑Write | Schema‑on‑Read / Flexible |
-| 一致性模型 | ACID 強一致 | BASE 最終一致 |
-| 優勢 | 複雜查詢、交易可靠 | 高擴展、彈性、效能 |
-| 常見應用 | 銀行、訂單系統 | CMS、快取、大數據 |
-
-> Schema-on-Write：寫入時定義結構，確保資料一致性
-> Schema-on-Read：讀取時才解析結構，提供彈性
+- **測試計畫**、**Jest** 單元測試、**Playwright** E2E
+- **GitHub Actions** 與 CI/CD 實務
 
 ---
 
-## 思考
+## 第三週課程大綱
 
-如果你要設計一個社群媒體 App...
+- **環境準備**：安裝必要工具與軟體
+- 以 Todo App 為例，熟悉 **Git** 與 **GitHub** 協作流程（本週聚焦版控；容器與測試見第六週、第十一週）
 
-1. Threads Post?
-2. Instagram Story?
-
-> 你會選擇哪一種資料庫？
-
----
-### SQL (關聯式資料庫)
-
-* **核心概念**：表格 (Table) + 關聯 (Relation)
-* **ACID 保證**
-  * **A**tomicity　*原子性*
-  * **C**onsistency　*一致性*
-  * **I**solation　*隔離性*
-  * **D**urability　*持久性*
-* **強項**：需要強一致 & 複雜關聯 (銀行、ERP)
-* **代表**：PostgreSQL、MySQL、Oracle、SQL Server
-
-> 相信大家都老熟了...
-
----
-### NoSQL (非關聯式資料庫)
-
-* **核心**：Not Only SQL，多樣資料模型
-* **BASE 模型** (最終一致)
-  * Basically Available
-  * Soft State
-  * Eventually Consistent
-* **優勢**：高擴展、彈性、特定場景高效能
-* **代表類型**：Key‑Value、Document、Column‑Family、Graph
-
-> 你會發現 NoSQL 的資料庫更能拓展系統的規模，但相對的也會犧牲掉一些穩定性
-
----
-## NoSQL 四大類型概覽
-
-1. **Key‑Value Stores**
-2. **Document Stores**
-3. **Column‑Family Stores**
-4. **Graph Databases**
-
----
-### 1️⃣ Key‑Value Stores（KV）
-
-* 就是一個 Key 對應一個 Value，有點像 JSON、Map、Object 一樣，非常簡單
-* `Key → Value` 直接映射，操作極速
-* 典型場景：**快取**、**Session**
-* 代表：Redis、DynamoDB、Memcached
+> 你可以到課程內容下載這份簡報，你也可以順便打開我們附上的教學文件幫助你跟上腳步
 
 ---
 
-例如：當你需要實作 API 限流 (Rate Limiting) 時，可以將使用者的 IP 位址或 Session ID 作為 Key，存取次數作為 Value，透過 Redis 這類 Key-Value 資料庫來實現高效能的用量控制。
+## 環境準備
 
----
-### 2️⃣ Document Stores
+### 必要工具
 
-* 就是 JSON/BSON 文件，Schema‑Flexible
-* 典型場景：CMS、logs
-* 代表：MongoDB、CouchDB、Firebase
-
-> JSON 是純文字格式，而 BSON 是二進制格式，提供更高效的序列化與更多資料類型支援
-
----
-
-其實很多應用程式，都有一個叫 Store 的東西，用來存一些簡單的資訊，例如使用者設定
-
----
-### 3️⃣ Column‑Family Stores
-
-* Row Key + Column Families，寫入吞吐高
-* 典型場景：大數據分析、時間序列
-* 代表：Cassandra、HBase、Bigtable
-  
-> 把資料分類存放，查詢複雜度就會降低、更有效率！
-
----
-### 4️⃣ Graph Databases
-
-* Nodes + Edges 表示關係，遍歷高效
-* 典型場景：社交網路、推薦引擎、詐欺偵測
-* 代表：Neo4j、Amazon Neptune
+1. **電腦**：Windows、Mac 或 Linux
+2. **任一開發工具**
+3. **任一瀏覽器**
+4. **GitHub 帳號**
+5. **Windows 用戶建議**：安裝 WSL 2（Windows Subsystem for Linux 2）
+6. **Node.js**：下載並安裝 [Node.js](https://nodejs.org/)，通常會順便安裝 npm
 
 ---
 
-### 5️⃣ Vector Databases
-
-* 專門處理向量資料
-* 典型場景：推薦系統、圖像搜尋、自然語言處理、**AI**、**RAG**
-* 代表：Faiss、Annoy、HNSW
-  
----
-## 選型考量 Checklist
-
-1. 資料模型 & 關聯複雜度
-2. 讀寫比例
-3. 一致性 vs 可用性
-4. 擴展策略 (Vertical / Horizontal)
-5. 團隊熟悉度 & 生態
-6. 成本、合規、安全需求
-7. 專用功能：全文、GIS、圖遍歷、時間序列、向量搜尋
+# 先給大家一點時間安裝！
 
 ---
 
-# 進階資料庫設計概念
+## Node.js?
 
-> 提升效能、擴展與可靠性。
+Node.js 是一個開源的 JavaScript 「執行環境」，讓我們可以在伺服器端（Server Side）運行 JavaScript 程式碼。
 
----
-### 概念 1｜Sharding
+過去我們只能在瀏覽器上運行 JavaScript，而 Node.js 就是讓我們可以「執行」 JavaScript 的工具，就好像是 Python 的 `python` 指令一樣。
 
-將資料分散到多台伺服器上，就像把工作分配給多個團隊，每個團隊負責處理一部分資料，提升整體效能和容量
-
-> 通常一個資料庫服務很難撐住所有流量，所以需要分散到多台伺服器上
-
----
-### 概念 2｜Replication
-
-資料複製機制，分為同步和非同步兩種模式。同步確保資料即時一致，非同步則提供更好的效能。主要用於提升系統可用性和讀取效能
-
-> CDN 的原理就是這樣，把資料複製到多個地方，讀取時就近讀取
-
----
-### 概念 3｜Caching
-
-快取策略，就像把常用資料放在記憶體中，減少存取硬碟的次數。常見策略：
-* Cache-Aside：先查快取，沒有才查資料庫
-* Read-Through：讀取時自動更新快取
-* Write-Through：寫入時同步更新快取
-* Write-Back：先寫入快取，之後再同步到資料庫
-
----
-### 概念 4｜CAP Theorem
-
-分散式系統的三個核心特性，但只能同時滿足其中兩個：
-* 一致性：所有節點看到相同的資料
-* 可用性：系統持續回應請求
-* 分區容錯：網路故障時仍能運作
-
----
-### 概念 5｜Indexing
-
-資料庫的索引機制，幫助快速定位資料。常見類型：
-* B-Tree：平衡樹結構，適合範圍查詢
-* Hash：雜湊表，適合精確匹配
-* Full-Text：全文檢索
-* Geo：地理空間索引
-
-> 索引能提升查詢速度，但需要權衡維護成本
+> 簡單來說，Node.js 讓我們可以使用 JavaScript 開發伺服器端的應用程式！
 
 ---
 
-# Discord 資料庫演進 — 一段擴展故事
+## npm?
 
----
-## 背景與挑戰
+**NPM**（Node Package Manager）是 Node.js 的套件管理工具，讓我們可以輕鬆地安裝、更新和管理 JavaScript 套件。
 
-* 2015‑2016：Discord 用戶暴增，每天要處理的訊息量越來越大
-* 原本用的 MongoDB 資料庫撐不住了：寫入速度變慢，延遲變高
-* 最重要的是要確保全球用戶都能即時聊天，不能卡頓
+### pnpm?
 
----
-## 階段一：改用 Cassandra
+**pnpm** 是一款更高效、現代化的 Node.js 套件管理工具，本課程將使用它管理套件（packages、dependencies）。
 
-* **為什麼要換**：需要更好的擴展能力，能處理更多寫入
-* **怎麼做**：用伺服器 ID 來分散資料，讓每台伺服器負擔變小
-* **新問題**：讀取變慢了，而且資料一致性需要調整
-
----
-## 階段二：改用 ScyllaDB
-
-* **為什麼要換**：Cassandra 用 Java 寫的，記憶體回收會造成延遲
-* **ScyllaDB**：用 C++ 重寫的版本，功能一樣但效能更好，伺服器數量可以減少一半以上
-* **好處**：延遲降低 5-10 倍，硬體成本省了 30% 以上
-
----
-## 其他優化方法
-
-* **用 Redis 存狀態**：記錄誰在線上，快取常用資料
-* **用 Rust 寫中間層**：統一管理資料流向，聰明地分散負載
-* **大量使用快取**：減少直接讀取資料庫的次數
-* **批次寫入**：把多筆資料一次寫入，減少即時壓力
-
----
-## 學到的經驗
-
-1. **不同資料庫各司其職**：根據資料特性選擇最適合的資料庫
-2. **慢慢改，持續監控**：一步一步升級，風險比較小
-3. **自己寫工具補強**：開發中間層和分片工具來解決限制
-4. **持續優化**：系統擴展是永無止境的，要不斷改進
-
----
-# RESTful API 是什麼？
-
-在我們深入探討 OpenAPI 之前，先來了解一下 RESTful API 的基本概念。
-
----
-## REST 核心原則
-
-REST 是一種設計 Web 服務的架構風格，主要原則有：
-
-* **資源 (Resources)**：用 URI 來標識資源，如 `/users`、`/products/123`
-* **表述 (Representations)**：用 JSON 或 XML 等格式傳輸資源
-* **狀態轉移 (State Transfer)**：透過操作資源來改變伺服器狀態
-* **統一介面 (Uniform Interface)**：使用標準的 HTTP 方法來操作資源
-* **無狀態 (Stateless)**：每次請求都是獨立的，伺服器不保存客戶端狀態
-
----
-## HTTP 方法與 RESTful API
-
-RESTful API 常見使用 HTTP 方法來表達對資源的操作：
-
-| HTTP 方法 | CRUD 操作 | 描述                                   | 是否冪等 (Idempotent) |
-|-----------|-----------|----------------------------------------|-----------------------|
-| `GET`     | Read      | 讀取資源                               | 是                    |
-| `POST`    | Create    | 新增資源                               | 否                    |
-| `PUT`     | Update    | 更新或取代整個資源                      | 是                    |
-| `PATCH`   | Update    | 部分更新資源                            | 否 (通常)             |
-| `DELETE`  | Delete    | 刪除資源                               | 是                    |
-
-> **冪等性**：多次相同請求，結果應相同 (e.g., GET, PUT, DELETE)。
-> 也就是我這次 GET 跟下次 GET 結果應該一樣，不會因為我 GET 一次就變成別的東西
-
----
-## 為何選擇 RESTful API？
-
-* **簡單**：基於 HTTP 標準
-* **可擴展**：無狀態設計
-* **靈活**：支援多種資料格式
-* **通用**：跨平台支援
-* **整合**：與 Web 技術相容
-
-> RESTful API 是設計 Web App 的強大框架。為確保大型 API 的一致理解，OpenAPI (Swagger) 應運而生。
-
----
-## RESTful API 設計：常見的 好與壞 實踐
-
-### 1. URI 設計
-❌ `/getUsers`, `/createProduct`  
-✅ `/users`, `/products`  
-
-❌ `/users/1/updateEmail`  
-✅ `PUT /users/1`  
-> URI 用名詞，HTTP 方法表示操作
-
-### 2. 格式與狀態碼
-❌ 大小寫混用, 底線  
-✅ 小寫及連字號 (`/user-settings`)  
+> 總之就是現在的專案幾乎都是用 pnpm 來管理套件了，基本上指令幾乎跟 npm 一模一樣，使用 pnpm 會更快、更省空間。我們先來安裝吧！
 
 ---
 
-### 3. 狀態碼
+#### pnpm 安裝指令
 
-❌ 錯誤都回 200 OK  
-✅ 用正確狀態碼 (400, 404, 500)  
-> 快速理解結果
-
-### 4. 請求與回應
-❌ GET 用 Request Body  
-✅ 用 Query String  
-> GET 要冪等且可快取
-
-
----
-
-### 5. 單複數
-
-❌ 單複數混用 (`/user/1`, `/products`)  
-✅ 統一用複數 (`/users/1`, `/products`)  
-> 提高一致性
-
-
-### 6. 進階設計
-❌ 回傳過多/過少資料  
-✅ 提供篩選、分頁、欄位選擇  
-> 優化效能
-
----
-
-## 討論
-
-那如果我的 API 其實很複雜，不只是 CRUD？例如推薦系統、搜尋引擎、訂單系統...
-
-一定要用 RESTful API 嗎？
-
-> 當然不一定，像是 GraphQL、gRPC 等，都是現在有很常見的選擇
-
-助教認為：
-1. 如果是前端與後端溝通，用 RESTful API 或 GraphQL 是比較好的選擇
-2. 如果是後端與後端溝通，用 gRPC 或 RESTful API 是比較好的選擇
-
----
-# OpenAPI (Swagger)
-
----
-## OpenAPI 是什麼？
-
-* **OpenAPI Spec (OAS)**：以 YAML/JSON 描述 REST API 的標準格式。
-* **核心理念**：API = 合約 → 人機皆可讀。
-* **Swagger**：OAS 的工具家族 (Editor、UI、Codegen …)。
-
-> 就把它當成是一個設計 API 的工具吧！
-
----
-## 為何使用 OpenAPI？
-
-1. **標準化 & 共識**：同一份合約，減少溝通誤差。
-2. **自動化**：生成 SDK / Server Stub / 測試腳本，節省重複工。
-3. **互動式文件**：Swagger UI / Redoc 可即時 Try‑It。
-4. **Design‑First**：先設計、再開發，降低返工。
-
-
----
-
-## 直接來看範例！
-
-https://editor.swagger.io/
-
----
-## 文件結構總覽
-
-| Section | 作用 |
-| --- | --- |
-| `openapi` | 版本號 (ex. 3.0.0) |
-| `info` | 標題、版本、描述、聯絡人 |
-| `servers` | API Base URLs |
-| `paths` | 各端點 (Endpoint) 及 HTTP 方法 |
-| `components` | 共用資料模型 (schemas)、參數、回應、Security |
-| `security` | 全域安全設定 (OAuth2、API Key…) |
-
----
-## YAML 範例片段
-
-```yaml
-openapi: 3.0.0
-info:
-  title: Todo API
-  version: 1.0.0
-servers:
-  - url: https://api.example.com/v1
-paths:
-  /todos:
-    get:
-      summary: List all todos
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TodoList'
-```
----
-```yaml
-components:
-  schemas:
-    Todo:
-      type: object
-      properties:
-        id: { type: string, readOnly: true }
-        title: { type: string }
-        isCompleted: { type: boolean, default: false }
-    TodoList:
-      type: array
-      items:
-        $ref: '#/components/schemas/Todo'
+```bash
+npm install -g pnpm
 ```
 
----
-## Design-First vs Code-First API 開發
+#### 驗證安裝
 
-### Design-First 優點
-- 團隊先達成 API 設計共識
-- 前端可提前開發
-- 文件即合約，減少溝通成本
-- 支援自動化測試與程式碼生成
+```bash
+pnpm -v
+```
 
-### Code-First 優點
-- 開發速度快，適合快速迭代
-- 程式碼即文件，減少重複工作
-- AI 輔助提升開發效率與文件生成品質
-- 適合小型團隊或原型開發
-- 框架自動生成文件
+#### 為什麼選 pnpm？
 
-### 選擇建議
-- 大型專案：建議 Design-First
-- 小型專案：可採用 Code-First
-- 混合模式：先 Code-First 快速驗證，再轉 Design-First
-
----
-# 總結 (Week 14)
-
-- **資料庫選型**：理解 SQL vs NoSQL 差異、常見資料庫與選型要點。
-- **進階概念**：Sharding、Replication、Caching、CAP、Indexing。
-- **案例**：Discord 擴展之路。
-- **OpenAPI**：設計優先、工具生態與實作流程。
+- **高效**：安裝速度快，節省磁碟空間。
+- **兼容性**：支援 npm 指令，易於上手。
+- **現代化**：適合 monorepo 等架構。（等一下會介紹！）
+- 甚至有些開源專案已經不再支援 npm 了...
 
 ---
 
-# 期末專案提醒
+# 再給大家一些安裝時間
+
+請大家現在安裝教學文件上說明的按照指示，安裝必要工具。
 
 ---
 
-# AMA (Ask Me Anything)
+# Git
 
-> 有任何問題都可以問我，我會盡量回答
+<img src='git-meme.png' height=500/>
 
 ---
-# Q & A
 
-> 感謝聆聽 — 有任何問題歡迎提出！
+## Git 版本控制
+
+### 為什麼需要 Git？
+
+Git 是現代開發的核心工具，幫助我們：
+
+- **版本管理**：追蹤程式碼變更，隨時回溯。
+- **團隊協作**：多人同時開發不衝突。
+- **分支開發**：獨立開發新功能或修復 Bug。
+
+---
+
+<img src='git-basic.png' height=620/>
+
+---
+
+### Git 基本概念
+
+- **Repository（儲存庫）**：程式碼與歷史記錄的存放處。
+- **Commit（提交）**：記錄程式碼變更的快照（snapshot）。
+- **Branch（分支）**：獨立開發路徑。
+- **Merge（合併）**：整合不同分支的變更。
+
+---
+
+<img src='git-command.png' height=620/>
+
+---
+
+### Git 運作原理
+
+Git 採用 **快照 (snapshot)** 機制管理版本，而非傳統的差異（diff）儲存。
+
+#### 核心機制
+
+1. **快照記錄**：
+   - 每次 Commit，Git 記錄所有檔案的完整狀態。
+   - 未變更的檔案只存指標，節省空間。
+2. **物件模型**：
+   - **Blob**：檔案內容。
+   - **Tree**：目錄結構。
+   - **Commit**：版本記錄（包含作者、時間等）。
+3. **SHA-1 雜湊值**：
+   - 每個物件有唯一識別碼（ID）
+
+---
+
+#### 比喻
+
+想像 Git 是一台「智慧型時光相機」：
+
+- 按下快門（Commit）記錄整個場景。
+- 未變動部分重用舊照片，節省空間。
+- 相簿（`.git` 目錄）用指紋（SHA-1）管理照片。
+
+> `.git` 是在你的專案裡的隱藏資料夾，裡面存放著所有的版本控制資訊。
+> 你可以用 `ls -a` 指令來查看這個資料夾，裡面有很多 Git 自己的檔案與資料夾。
+
+---
+
+### 安裝與設定 Git
+
+#### 安裝
+
+- **Windows**：下載 [Git](https://git-scm.com/download/win)，包含 Git Bash。
+- **Mac**：`brew install git`
+- **Linux**：`sudo apt install git`
+- 驗證：`git --version`
+
+#### 基本設定
+
+```bash
+git config --global user.name "你的名稱"
+git config --global user.email "你的Email"
+```
+
+> Git 會使用這些資訊來標記你的提交紀錄，讓其他人知道這些變更是由誰做的。
+
+檢查：`git config --list`
+
+---
+
+# GitHub
+
+<img src='github-meme.png' height=500/>
+
+---
+
+## GitHub 簡介
+
+GitHub 是一個基於 Git 的雲端儲存庫平台，提供版本控制、協作開發和社群功能。
+
+- **版本控制**：儲存與管理程式碼歷史。
+- **協作開發**：多人同時開發，透過 Pull Request 進行程式碼審查。
+- **社群功能**：問題（Issues）、Wiki、專案管理等。
+- **開源專案**：支援開源專案，促進社群貢獻。
+- **CI/CD**：整合 GitHub Actions，自動化測試與部署。（等一下會介紹！）
+
+---
+
+## SSH 設定
+
+### 為什麼使用 SSH？
+
+讓 GitHub 與本地端安全連線，避免每次推送都要輸入帳號密碼（現在 GitHub 也不支援直接輸入密碼登入了），尤其是當你使用雲端機器時。
+
+> 通常在雲端機器上不會使用 HTTPS 連線，因為這樣會需要每次都輸入帳號密碼，甚至 GitHub 還要求你使用 Token 來登入，這樣會更麻煩。
+
+---
+
+<img src='ssh-meme.png' height=600/>
+
+---
+
+### SSH 設定步驟
+
+1. 生成金鑰：
+   ```bash
+   ssh-keygen -t rsa -b 4096 -C "你的Email"
+   ```
+2. 添加公鑰至 GitHub：
+   - 查看公鑰：`cat ~/.ssh/id_rsa.pub`
+   - 在 [GitHub SSH 設定](https://github.com/settings/keys) 添加。
+3. 測試連線：
+   ```bash
+   ssh -T git@github.com
+   ```
+
+> ssh-keygen 會生成兩個檔案，`id_rsa` 是私鑰，`id_rsa.pub` 是公鑰。私鑰要保密，公鑰可以分享給 GitHub。私鑰會用來加密你的連線，而公鑰則是用來讓 GitHub 驗證你的身份。
+
+---
+
+# 實作時間
+
+設定完記得截圖作為今天點名的證明！
+
+---
+
+### Git Flow：分支管理實踐
+
+**Git Flow** 是一種 Git Branching Model（分支模型），是十幾年前提出的 Git 協作流程。
+
+> 現在，根據不同的專案需求，Git Flow 也有很多變種，像是 GitHub Flow、GitLab Flow 等等。
+
+#### 分支模型
+
+- **Main**：正式發布版本。 **(永遠是可部署狀態)**
+- **Develop**：開發中的程式碼。 **(整合所有功能)**
+- **Feature**：新功能開發分支。 **(從 Develop 分出)**
+- **Release**：準備發布的版本。 **(從 Develop 分出，用於測試與修復)**
+- **Hotfix**：緊急修復分支。 **(從 Main 分出，修復線上 Bug)**
+
+---
+
+<img src='gitflow-meme.png' height=500 />
+
+---
+
+#### 各分支詳解
+
+- **Main (Master)**:
+  - 代表 **穩定、已發布** 的版本。
+  - 只接受來自 `Release` 或 `Hotfix` 分支的合併。
+  - **嚴禁** 直接在此分支開發。
+- **Develop**:
+  - **整合** 所有已完成的功能 (`Feature`)。
+  - 是 `Feature` 和 `Release` 分支的基礎。
+  - 代表 **下一個版本** 的開發狀態。
+
+---
+
+#### 各分支詳解 (續)
+
+- **Feature**:
+
+  - 用於開發 **新功能**。
+  - **必須** 從 `Develop` 分支出來。
+  - 完成後 **必須** 合併回 `Develop`。
+  - 命名建議：`feature/功能名稱` (e.g., `feature/user-login`)。
+    > 但其實現在很多開源專案都不會限制命名規則了～
+
+- **Release**:
+  - 用於 **準備發布** 新版本。
+  - 從 `Develop` 分支出來。
+  - 在此分支進行 **測試、Bug 修復、版本號更新**。
+  - 完成後 **同時合併** 回 `Main` (標記版本) 和 `Develop` (同步修復)。
+
+---
+
+- **Hotfix**:
+  - 用於 **緊急修復** `Main` 分支上的 Bug。
+  - **必須** 從 `Main` 分支出來。
+  - 完成後 **同時合併** 回 `Main` 和 `Develop`。
+
+> 以上是 Git Flow 的基本概念，實際上有些團隊會根據需求調整流程，但大致上都是這樣的運作方式就是了。
+
+---
+
+#### 分支圖示
+
+<img src='git-flow.png' height=500/>
+
+---
+
+#### Git Flow 協作流程
+
+1.  **開始新功能**：從 `Develop` 建立 `feature/新功能` 分支。
+2.  **開發與提交**：在 `feature` 分支上開發，頻繁提交變更。
+3.  **完成功能**：將 `feature` 分支合併回 `Develop`。
+4.  **準備發布**：當 `Develop` 累積足夠功能後，從 `Develop` 建立 `release/版本號` 分支。
+5.  **測試與修復**：在 `release` 分支上進行測試，只做 Bug 修復。
+6.  **正式發布**：
+    - 將 `release` 分支合併到 `Main`，並打上版本標籤 (Tag)。
+    - 將 `release` 分支合併回 `Develop`，確保修復也納入開發主線。
+7.  **緊急修復**：若 `Main` 出現 Bug，從 `Main` 建立 `hotfix/問題描述` 分支，修復後合併回 `Main` 和 `Develop`。
+
+---
+
+### Git Flow 實戰場景：新增待辦事項截止日期
+
+#### 角色
+
+- **小明**：新加入的開發者
+- **Senior Lin**：資深開發者，負責 Code Review
+- **PM Chen**：專案經理，提出需求
+
+#### 需求
+
+PM Chen 希望在 Todo App 中為每個待辦事項增加「截止日期」功能。
+
+---
+
+#### 場景步驟 1：準備開發
+
+1.  **PM Chen**：在專案管理工具 (如 Jira, GitHub Issues) 開立新任務：「新增待辦事項截止日期」。
+2.  **小明**：接下任務，先確保本地 `develop` 分支是最新狀態。
+    ```bash
+    git checkout develop
+    git pull origin develop
+    ```
+3.  **小明**：從 `develop` 分支建立新的 `feature` 分支。
+    ```bash
+    git checkout -b feature/add-due-date develop
+    # 分支名稱清晰表達功能目的
+    ```
+
+---
+
+#### 場景步驟 2：開發與提交
+
+1.  **小明**：在 `feature/add-due-date` 分支上開發新功能（修改程式碼、加入 UI 元素等）。
+2.  **小明**：開發過程中，進行多次小步提交 (Commit)。
+    ```bash
+    # 修改檔案 ...
+    git add .
+    git commit -m "feat: add due date input field"
+    # 繼續修改檔案 ...
+    git add .
+    git commit -m "feat: implement due date saving logic"
+    ```
+3.  **小明**：功能初步完成後，將本地分支推送到遠端儲存庫 (GitHub)。
+    ```bash
+    git push origin feature/add-due-date
+    ```
+
+---
+
+#### 場景步驟 3：建立 Pull Request (PR)
+
+1.  **小明**：前往 GitHub 儲存庫頁面，針對 `feature/add-due-date` 分支，點擊「Create Pull Request」。
+2.  **設定 PR**：
+    - **Base Branch**：`develop` (要合併到的目標分支)
+    - **Compare Branch**：`feature/add-due-date` (包含新功能的分支)
+    - **標題**：清晰描述 PR 的目的 (e.g., "Feat: Add Due Date Feature")
+    - **描述**：說明變更內容、如何測試、關聯的任務編號等。
+    - **Reviewers**：指派 **Senior Lin** 進行 Code Review。
+
+---
+
+#### 場景步驟 4：Code Review 與合併
+
+1.  **Senior Lin**：收到 PR 通知，檢視小明的程式碼變更。
+2.  **討論與修改 (可能發生)**：
+    - Senior Lin 可能會提出建議或要求修改，在 PR 頁面留言。
+    - 小明 根據回饋，在本地 `feature/add-due-date` 分支修改程式碼，再次 commit 並 push。PR 會自動更新。
+3.  **批准 PR**：Senior Lin 對程式碼滿意後，點擊「Approve」。
+4.  **合併 PR**：
+    - Senior Lin (或 小明，取決於團隊權限設定) 點擊「Merge Pull Request」。
+5.  **刪除分支 (可選)**：合併後，可以安全地刪除遠端和本地的 `feature/add-due-date` 分支。
+
+---
+
+#### 場景總結
+
+- **PM Chen**：追蹤任務狀態
+- **小明**：透過 Git Flow 貢獻了新功能
+- **Senior Lin**：確保了程式碼品質
+
+這個流程確保了新功能在獨立分支開發，經過審查後才合併，降低了直接修改主開發線的風險，也讓進度追蹤變得清楚。
+
+---
+
+# 試試看吧！
+
+（詳細請參考教學文件）
+
+1. Fork Todo App 專案：https://github.com/114-2-SAD/SADo
+2. Clone 你的專案到本地端：`git clone git://<your-github-username>/SADo.git`
+3. 從 `develop` 分支建立 `feature/your-feature-name` 分支
+4. 隨意修改一行程式碼
+5. 使用 `git add`、`git commit` 提交變更
+6. Push 到 GitHub
+7. 建立 Pull Request，並指派給自己
+8. 等待自己 Code Review
+9. 合併 PR，刪除分支
+
+---

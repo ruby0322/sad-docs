@@ -1,0 +1,119 @@
+---
+title: 第三週回顧
+description: Git、GitHub 重點與 Cheat Sheet（第六週課前複習）
+icon: ClipboardList
+---
+
+## Git 版本控制
+
+### Key Takeaways
+
+- Git 是分散式版本控制系統，可追蹤檔案變更歷史
+- 分支開發模式使團隊協作更有效率
+- 衝突是正常的，應當學會如何正確解決
+- 良好的 commit 訊息能大幅提高協作品質
+
+### Git 常用指令 Cheat Sheet
+
+| 指令 | 說明 | 範例 |
+| --- | --- | --- |
+| `git init` | 初始化專案，創建 .git 資料夾 | `git init` |
+| `git clone` | 複製遠端專案 | `git clone https://github.com/username/repo.git` |
+| `git add` | 加入檔案到暫存區 | `git add .` 或 `git add file.js` |
+| `git commit` | 提交變更到本地庫 | `git commit -m "feat: add login function"` |
+| `git push` | 推送變更到遠端 | `git push origin main` |
+| `git pull` | 拉取並合併遠端變更 | `git pull origin main` |
+| `git fetch` | 下載遠端變更但不合併 | `git fetch origin` |
+| `git status` | 查看檔案狀態 | `git status` |
+| `git log` | 查看變更歷史 | `git log` 或 `git log --oneline` |
+| `git branch` | 列出/創建分支 | `git branch` 或 `git branch feature/login` |
+| `git checkout` | 切換分支 | `git checkout develop` 或 `git checkout -b feature/new` |
+| `git merge` | 合併分支 | `git merge feature/login` |
+| `git diff` | 查看變更的內容 | `git diff` 或 `git diff file.js` |
+| `git reset` | 重設到特定狀態 | `git reset --hard HEAD^` |
+| `git stash` | 暫存未提交的變更 | `git stash` 和 `git stash pop` |
+
+### Commit Message 最佳實踐
+
+撰寫清晰一致的 commit message 能幫助團隊理解程式碼變更的目的和內容。遵循以下前綴(prefix)規範可使 commit 歷史更有條理：
+
+| Type | 說明 | 範例 |
+| --- | --- | --- |
+| `feat` | 新增/修改功能 (feature) | `feat: add user registration` |
+| `fix` | 修補 bug (bug fix) | `fix: resolve login error on Safari` |
+| `docs` | 文件修改 (documentation) | `docs: update API endpoints in README` |
+| `style` | 格式調整 (不影響程式碼運行) | `style: format code and add semicolons` |
+| `refactor` | 重構 (既不是新增功能，也不是修補 bug) | `refactor: simplify authentication logic` |
+| `perf` | 改善效能 | `perf: optimize database queries` |
+| `test` | 增加測試 | `test: add unit tests for auth service` |
+| `chore` | 建構程序或輔助工具的變動 | `chore: update webpack configuration` |
+| `revert` | 撤銷回覆先前的 commit | `revert: feat: user profile page (回覆版本: a1b2c3d)` |
+
+**規範格式**: `type(scope): subject`
+
+- **type**: 上述類別之一
+- **scope** (選填): 表示 commit 影響的範圍，如 `auth`、`api`、`ui` 等
+- **subject**: 簡明扼要的變更描述
+
+**範例**:
+
+```
+feat(auth): implement OAuth2 login with Google
+fix(ui): resolve button alignment in Safari browser
+docs(api): update authentication endpoints documentation
+refactor(core): simplify error handling logic
+```
+
+### Git 開發流程實例
+
+**情境：小明為 Todo App 新增「使用者註冊」功能**
+
+1. **開始新任務**
+
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout -b feature/user-registration
+   ```
+
+2. **開發功能**
+
+   ```bash
+   git status
+   git add auth.js server.js
+   git commit -m "feat: add user registration endpoint and logic"
+   ```
+
+3. **繼續開發與推送**
+
+   ```bash
+   git add .
+   git commit -m "feat: create registration form UI"
+   git log -n 2 --oneline
+   git push origin feature/user-registration
+   ```
+
+4. **同步團隊變更**
+
+   ```bash
+   git checkout develop
+   git pull origin develop
+   git checkout feature/user-registration
+   git merge develop
+   git add .
+   git commit -m "merge: resolve conflicts with develop"
+   git push origin feature/user-registration
+   ```
+
+## GitHub 協作
+
+- **遠端儲存庫**：以 `origin` 對應 GitHub 上的專案，搭配 `push` / `pull` 同步。
+- **Pull Request**：在獨立分支完成開發後開 PR，進行 code review 再合併至主線。
+- **Issues / Projects**：追蹤需求、bug 與任務分工。
+
+完整說明見 [GitHub 章節](/docs/week3/github)。
+
+## 本課程後續週次
+
+- **第六週**：Docker、Docker Compose、雲端原生與部署 — [第六週文件](/docs/week6)
+- **第十一週**：測試計畫、Jest、Playwright、GitHub Actions — [第十一週文件](/docs/week11)

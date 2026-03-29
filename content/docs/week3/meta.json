@@ -1,14 +1,7 @@
 {
   "root": true,
   "title": "第三週",
-  "description": "資料庫與 API 設計",
+  "description": "Version Control、Git、GitHub",
   "icon": "Dice3",
-  "pages": [
-    "index",
-    "database-selection",
-    "advanced-database-concepts",
-    "discord-case-study",
-    "restful-api",
-    "openapi"
-  ]
+  "pages": ["index", "getting-started", "git", "github"]
 }
