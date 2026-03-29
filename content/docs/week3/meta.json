@@ -3,5 +3,11 @@
   "title": "第三週",
   "description": "Version Control、Git、GitHub",
   "icon": "Dice3",
-  "pages": ["index", "getting-started", "git", "github"]
+  "pages": [
+    "index",
+    "getting-started",
+    "git",
+    "branch-strategy",
+    "github"
+  ]
 }

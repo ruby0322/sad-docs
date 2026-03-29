@@ -1,158 +1,62 @@
 ---
-title: "CI/CD 基礎 - GitHub Actions"
+title: "GitHub：遠端協作與 Pull Request"
 icon: Github
 ---
 
-現代開發流程 **DevOps**強調 **版本控制** 與 **持續整合/持續部署 (CI/CD)**，這不僅能確保程式碼品質，也能提升開發效率。
-
-- **DevOps**：開發 (Development) 與運營 (Operations) 的縮寫，是一個結合軟體開發與 IT 運營的文化與實踐方法，強調開發團隊與運營團隊之間的協作，旨在提高軟體交付速度。
-- **持續整合 (CI)**：每次提交程式碼時，自動執行整合測試（Integration Test），確保新功能沒有問題外，也確保舊功能沒有被破壞。
-- **持續部署 (CD)**：當測試通過後，自動將應用程式部署到雲端，使新功能能夠快速上線。
-
-在本章節，我們將學習如何使用 **GitHub Actions** 自動化測試與部署，並搭配上一篇的 **Playwright** 來驗證應用程式的運作狀況。
+**GitHub** 是最常用的 Git 遠端托管與協作平台之一。第三週這一章專注在**儲存庫、分支推送、Fork 與 Pull Request（PR）**；將程式碼接上自動測與 **CI**（例如每次 PR 跑測試）則放在 **第十一週的 [GitHub Actions](/docs/week11/github)**，請在寫完測試後再接上。
 
 ---
 
-## 1. 版本控制與 GitHub Actions 介紹
+## 為什麼需要 GitHub（或類似平台）？
 
-### **Git：版本控制的基礎**
-
-**Git** 是開發團隊協作的核心工具，主要功能包括：
-
-✅ **追蹤變更**：記錄每一次的程式碼修改，提供回溯機制。  
-✅ **分支管理**：開發新功能時，可建立獨立的分支（Branch），避免影響主線（Main Branch）。  
-✅ **協作開發**：支援多人開發，透過 Pull Request 進行程式碼審查 (Code Review)。
-
-> Pull Request 顧名思義，就是當你想要提交新功能或修復 Bug 時，需要向專案管理者發送請求，請求對方將你的程式碼「拉」到主要程式碼庫中，在 GitLab 等平台中，這個功能通常被稱為 Merge Request。
-
-### **GitHub Actions：自動化 CI/CD**
-
-**GitHub Actions** 是 GitHub 提供的 **CI/CD 平台**，可以用來：
-
-✅ **自動執行測試**：每次推送 (Push) 或建立 Pull Request (PR) 時，執行 Playwright 測試。  
-✅ **自動化部署**：當測試通過後，自動將應用程式部署至雲端（下週將介紹！）。  
-✅ **提供即時回饋**：若測試失敗，會立即通知開發者進行修正。
+- **中央式的協作界面**：Issue、PR、Review 留言都集中在網頁上，降低溝通成本。  
+- **權限與分支保護**：可設定誰能 merge、`main` 是否一定要經過 PR。  
+- **與課程銜接**：先熟練 PR 流程，第十一週再在 PR 上掛 **GitHub Actions**。
 
 ---
 
-## 2. 設定 GitHub Actions
+## Pull Request 是什麼？
 
-我們將建立一個 **CI/CD Workflow**，讓 GitHub 在每次推送程式碼時，自動執行 **Playwright 測試**。
+**Pull Request**（在 GitLab 等平台常稱 **Merge Request**）代表：你希望把某個分支的變更**合併進**目標分支（例如 `dev` 或 `main`），並請團隊在合併前做 **Code Review**。
 
-### **步驟 1：建立 GitHub Actions Workflow**
+典型流程：
 
-在專案根目錄建立 `.github/workflows/ci.yml`，並填入以下內容：
+1. 從約定的基礎分支（例如 `dev`）開出功能分支（見 [分支策略](/docs/week3/branch-strategy)）。  
+2. 本地開發、`commit`、`push` 到 GitHub 上的同名分支。  
+3. 在 GitHub 開啟 **New Pull Request**：選擇「從哪個 branch 合併到哪個 branch」。  
+4. 指定 Reviewer、填寫說明、依討論修改後，由維護者 **Merge**（或你自己在權限允許下完成）。
 
-```yaml
-name: Playwright Tests
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.3
-          run_install: false
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build Application
-        run: pnpm build
-
-      - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.10.0
-        with:
-          mongodb-version: "6.0"
-
-      - name: Start Application
-        run: pnpm start &
-        env:
-          NODE_ENV: test
-          MONGO_URL: mongodb://localhost:27017
-          DB_NAME: sado-test
-
-      - name: Wait for Application to be Ready
-        run: |
-          for i in {1..10}; do
-            if nc -z localhost 3000; then
-              echo "Application is up!"
-              break
-            fi
-            echo "Waiting for application..."
-            sleep 3
-          done
-
-      - name: Install Playwright Browsers
-        run: cd apps/frontend && pnpm exec playwright install --with-deps
-
-      - name: Run Tests
-        run: pnpm test
-
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
-```
-
-這代表當每次 **Push** 或 **Pull Request** 時，GitHub 會看到這個在 `.github/workflows` 目錄下的設定檔並自動執行相應的測試流程。
+> Code Review 不只是挑錯，也是團隊對程式風格、測試與設計共識的累積。
 
 ---
 
-### **步驟 2：推送至 GitHub 觸發自動測試**
+## Fork 與上游（課程專案）
 
-確保專案已設定 Playwright 測試後，將 GitHub Actions 設定推送到 **GitHub**：
+若課程提供範例儲存庫（如 SADo），常見作法是：
 
-```bash
-git add .
-git commit -m "新增 GitHub Actions CI/CD 配置"
-git push origin main
-```
+1. 在 GitHub **Fork** 到自己的帳號底下。  
+2. **Clone** 自己的 Fork 到本機。  
+3. 將**課程官方儲存庫**設為 `upstream`（若需要同步範本更新）：  
+   ```bash
+   git remote add upstream https://github.com/114-2-SAD/SADo.git
+   git fetch upstream
+   ```  
+4. 在自己的分支上開發，並對 **自己的 Fork** 或**原專案**（若開放 PR）送出 Pull Request。
 
-推送後，前往 GitHub **Actions 頁面** (`https://github.com/你的帳號/你的專案/actions`)，確認測試是否成功執行。
-
----
-
-## 3. 進階使用情境
-
-想像一下，當你的專案有多個開發者、多個分支時，除了確保每次推送的程式碼本身是穩定的之外，還需要確保在整合到主分支時，整個應用程式的運作狀況仍然正常。
-
-而使用 GitHub 時，我們通常使用 **Pull Request** 來進行程式碼審查，這時候，我們可以透過 GitHub Actions 來自動執行測試，在人工審查之前就能夠發現問題。
+實際 URL 以課程公告為準；若組織仍是 `113-2-SAD`，請將 remote 改為對應網址。
 
 ---
 
-## 4. 總結
+## Issue 與任務追蹤
 
-今天，我們學習了：
+- **Issue**：記錄 bug、需求、討論決策。  
+- 可與 PR 互相引用（例如 `Closes #12`），合併後自動關聯 Issue。
 
-🚀 **如何透過 GitHub Actions 自動執行 Playwright 測試**  
-🎭 **如何撰寫 CI/CD 流程，確保程式碼品質**
+這些都與第十一週的 **CI** 無衝突：PR merge 前除了人工 Review，之後還可加上 **Actions 自動測試**（見 [GitHub Actions](/docs/week11/github)）。
 
-下週，我們將學習更進階的 CI/CD 技巧，包括**如何使用 Docker Compose 部署全端應用程式至雲端原生環境**。敬請期待！
+---
+
+## 小結
+
+第三週在 GitHub 上要掌握的是：**遠端、分支、PR、Review 與合併策略**（搭配 [分支策略](/docs/week3/branch-strategy)）。  
+**GitHub Actions** 留到第十一週，與 [測試計畫](/docs/week11/test-plan)、[Playwright](/docs/week11/e2e-tests) 一併完成 DevOps 實作。

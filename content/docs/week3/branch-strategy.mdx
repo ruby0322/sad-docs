@@ -1,0 +1,108 @@
+---
+title: 分支策略
+description: 以 SADo 為例的 Git Flow、分支命名與常見整合操作
+icon: GitBranch
+---
+
+本章整理自課程實作用的分支演練脈絡，說明如何在團隊情境下訂定分支策略，並搭配 `merge`、`rebase`、Pull Request 等流程。
+
+## 範例專案：SADo APP
+
+- **性質**：Minimal Todo App  
+- **範例分支**：`main`、`dev`、`feat/priority`、`feat/label`  
+- **策略**：採用類 **Git Flow** 的概念——**`main` 對應 production**，**`dev` 對應 staging / 整合線**  
+- **故事設定**：`feat/priority` 已可合併；`feat/label` 尚有 bug 需修
+
+## Git 常用指令複習
+
+與分支、整合相關的操作，可先熟悉：
+
+- `git init`、`git clone`
+- `git add`、`git commit`
+- `git branch`、`git checkout`（或 `git switch`）
+- `git merge`、`git rebase`
+- `git push`
+
+詳細說明見 [Git](/docs/week3/git)。
+
+## 實作任務清單（課堂演練）
+
+1. 檢視分支 `bIg_BrAIn-BRAnH`（名稱刻意設計，練習辨識與操作）
+2. 新建分支 `feat/toast` 並貢獻程式碼
+3. 將 **`feat/priority` merge 進 `dev`**
+4. 在 **`feat/label` 修復 bug**
+5. 將 **`feat/label` rebase 到 `dev`**
+6. **還原 rebase** 後改以 **squash merge** 到 `dev`
+7. 再次還原後，**整理歷史**並 **rebase `feat/label` 到 `dev`**
+8. 在 GitHub 上建立 **Pull Request**
+
+## 最佳實踐：分支與 Commit
+
+### 分支命名
+
+- **功能分支**：建議以 `feat/` 為前綴  
+- **團隊協作**：也可採 `使用者名稱/功能簡述`，便於辨識負責人
+
+### Commit message
+
+- **常見前綴**：`feat:`、`upd:`、`fix:`、`refactor:`、`style:`、`docs:`、`chore:` 等  
+- **訊息要具體**  
+  - 較好：`add priority selection`、`fix label deletion bug`  
+  - 避免：`new feature`、`fix bug`、`haha` 等無從追溯的說明
+
+## 操作流程摘要
+
+### 貢獻 `feat/toast` 的範例步驟
+
+1. 切換到 `dev`  
+2. 實作中若需暫存未完成變更：`git stash`  
+3. 切換到 `feat/toast`：`git checkout feat/toast`（或 `git switch feat/toast`）  
+4. 取回暫存：`git stash pop`  
+5. Commit 並 `push` 到 `origin`
+
+### 將 `feat/priority` 合併進 `dev`
+
+1. `git checkout dev`  
+2. `git merge feat/priority`  
+3. 用 `git log --oneline --graph` 等指令檢視圖形化歷史
+
+### 在 `feat/label` 修 bug
+
+1. `git checkout feat/label`  
+2. 自行追查或使用 `git bisect` 協助定位問題  
+3. 修正後提交
+
+### 將 `feat/label` rebase 到 `dev`
+
+1. `git checkout feat/label`  
+2. `git rebase dev`  
+3. 檢查圖與測試；若已與遠端分歧，需依團隊規範使用 `push --force-with-lease`（慎用）
+
+### 還原 rebase 後以 squash 合併到 `dev`
+
+1. `git reset --hard ORIG_HEAD`（或記錄的 rebase 前 HEAD）  
+2. `git checkout dev`  
+3. `git merge --squash feat/label`  
+4. 完成 single commit 後推送
+
+### 還原後整理並互動式 rebase
+
+1. `git reset --hard ORIG_HEAD`  
+2. `git checkout feat/label`  
+3. `git rebase -i dev`（互動式整理 commits）
+
+> 投影片原稿曾寫成 `git reabse`，正確指令為 **`git rebase -i dev`**。
+
+## 在 GitHub 上開 Pull Request
+
+合併 PR 時，GitHub 通常提供三種策略：
+
+1. **Merge commit**：保留完整分支歷史與一個 merge commit  
+2. **Squash and merge**：將 PR 上多個 commit **壓成單一 commit** 再合併  
+3. **Rebase and merge**：將 commits **rebase 到目標分支** 再以快轉方式合併（歷史呈線性）
+
+團隊應事先約定預設策略，並在 [GitHub](/docs/week3/github) 與 Code Review 流程中一致執行。
+
+## 與後續章節的銜接
+
+- **第十一週**會在已熟悉的 PR 流程上，加上 [**GitHub Actions**](/docs/week11/github)：**在 push／PR 時自動跑測試**，與 [Playwright](/docs/week11/e2e-tests)、[Jest](/docs/week11/unit-tests) 章節搭配。

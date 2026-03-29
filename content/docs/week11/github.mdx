@@ -9,7 +9,7 @@ icon: Github
 - **持續整合 (CI)**：每次提交程式碼時，自動執行整合測試（Integration Test），確保新功能沒有問題外，也確保舊功能沒有被破壞。
 - **持續部署 (CD)**：當測試通過後，自動將應用程式部署到雲端，使新功能能夠快速上線。
 
-在本章節，我們將學習如何使用 **GitHub Actions** 自動化測試與部署，並搭配上一篇的 **Playwright** 來驗證應用程式的運作狀況。
+在 **第三週**你已熟悉 [Git](/docs/week3/git)、[分支策略](/docs/week3/branch-strategy) 與 [GitHub PR 流程](/docs/week3/github)。本章在 **第十一週**接著使用 **GitHub Actions** 自動化測試與部署，並搭配前幾篇的 **Playwright**、[單元測試](/docs/week11/unit-tests) 來驗證應用程式。
 
 ---
 
@@ -30,7 +30,7 @@ icon: Github
 **GitHub Actions** 是 GitHub 提供的 **CI/CD 平台**，可以用來：
 
 ✅ **自動執行測試**：每次推送 (Push) 或建立 Pull Request (PR) 時，執行 Playwright 測試。  
-✅ **自動化部署**：當測試通過後，自動將應用程式部署至雲端（下週將介紹！）。  
+✅ **自動化部署**：當測試通過後，可延伸將應用程式部署至雲端（可搭配 [第六週](/docs/week6) 容器與部署主題）。  
 ✅ **提供即時回饋**：若測試失敗，會立即通知開發者進行修正。
 
 ---
@@ -150,9 +150,9 @@ git push origin main
 
 ## 4. 總結
 
-今天，我們學習了：
+本章你應已掌握：
 
-🚀 **如何透過 GitHub Actions 自動執行 Playwright 測試**  
-🎭 **如何撰寫 CI/CD 流程，確保程式碼品質**
+- **如何透過 GitHub Actions 在 push／PR 時自動執行測試**（含 Playwright 流程）  
+- **如何撰寫基本的 CI workflow**，與 PR 流程搭配以提高程式碼品質
 
-下週，我們將學習更進階的 CI/CD 技巧，包括**如何使用 Docker Compose 部署全端應用程式至雲端原生環境**。敬請期待！
+若尚未複習容器與部署，可搭配課程手冊 [**第六週：Docker、Docker Compose 與雲端原生**](/docs/week6)。
