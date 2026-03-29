@@ -5,34 +5,46 @@ icon: Hand
 
 ## 第六週：Container（Docker、Docker Compose）與雲端原生
 
-本週在第三週版控與 GitHub 協作的基礎上，深入**容器化**與**多服務編排**：從 Docker 映像與 Dockerfile 出發，學習 Registry、Docker Compose 多容器協作，並簡介雲端原生思維與透過 SSH 部署的實務。
+本週在 [第三週](/docs/week3) Git／GitHub 的基礎上，深入**容器化**與**多服務協作**：從映像與 Dockerfile，到 Registry、Docker Compose，再談**容器編排**（以 [Docker Swarm](/docs/week6/docker-swarm) 為主；文中亦簡介 **Kubernetes** 為業界主流選項之一），並連結 [雲端原生](/docs/week6/cloud-native) 與 [SSH 遠端部署](/docs/week6/ssh-deploy)。完成後可銜接 [**第十一週**](/docs/week11) 測試與 **GitHub Actions**。
 
-關於第三週的重點複習，請參考[第三週回顧](/docs/week6/review-week3)，以 Git / GitHub 指令與流程為主。
+> 下列 **課程大綱**順序與左側文件目錄一致，方便對照章節。
 
 ## 課程大綱
 
-1. [**Docker 基礎與映像**](/docs/week6/docker)  
-   - 映像與容器、Dockerfile 撰寫與本機建置執行
+1. [**第三週回顧**](/docs/week6/review-week3)  
+   - Git／GitHub 重點與 Cheat Sheet，供本週實作前複習
 
-2. [**Docker 進階：Registry**](/docs/week6/docker-registry)  
-   - Docker Hub / Registry、標籤與推送映像
-
-3. [**Docker Compose 與多服務協作**](/docs/week6/docker-compose)  
-   - `docker-compose.yml`、多服務（例如前端 + 後端 + 資料庫）
-
-4. [**Docker Swarm 與 Stack**](/docs/week6/docker-swarm)（選讀／進階）  
-   - 叢集、`docker stack deploy`、滾動更新
-
-5. [**雲端原生簡介**](/docs/week6/cloud-native)  
+2. [**雲端原生簡介**](/docs/week6/cloud-native)  
    - 雲端原生原則、微服務與編排概念
 
-6. [**SSH 與遠端部署**](/docs/week6/ssh-deploy)  
-   - 金鑰、連線與部署流程
+3. [**Docker 基礎與映像**](/docs/week6/docker)  
+   - 映像與容器、Dockerfile 撰寫與本機建置執行
 
-7. **課堂練習與討論**  
+4. [**Docker 進階：Registry**](/docs/week6/docker-registry)  
+   - Docker Hub／Registry、標籤與推送映像
+
+5. [**Docker Compose 與多服務協作**](/docs/week6/docker-compose)  
+   - `docker-compose.yml`、多服務（例如前端 + 後端 + 資料庫）
+
+6. [**Docker Swarm 與 Stack**](/docs/week6/docker-swarm)（選讀／進階）  
+   - 為何需要**容器編排**、`docker stack deploy`、滾動更新；**K8s** 為業界主流之一，本課以 **Swarm** 降低入門門檻
+
+7. [**SSH 與遠端部署**](/docs/week6/ssh-deploy)  
+   - 金鑰、連線與在伺服器上部署容器與 Compose
+
+8. **課堂練習與討論**  
    - [常見問題與實作指引](/docs/week6/qa-discussion)
+
+## 學習目標
+
+- 能說明容器與映像的差異，並以 Dockerfile 建置與執行應用。  
+- 能使用 Registry 管理標籤，並將映像推送／拉取到合適的倉庫。  
+- 能撰寫 Docker Compose 組態，在本機啟動多服務應用。  
+- 能描述**容器編排**要解決的問題，並理解 **Swarm** 與 **Kubernetes** 在課程中的定位。  
+- 能透過 SSH 在遠端環境部署與基本驗證服務。
 
 ## 注意事項
 
-- 實作建議預先準備 Docker Hub（或相容 Registry）帳號。  
-- 遠端部署請注意埠號與環境變數，避免與他人衝突。
+- 實作前建議註冊 **Docker Hub**（或課程指定的相容 Registry）。  
+- 遠端部署請依配置表使用**埠號**與**環境變數**，避免與同學衝突。  
+- **Docker Desktop**／**Docker Engine** 若版本過舊，可能與範例 Compose 語法略有差異，必要時請對照官方文件。
