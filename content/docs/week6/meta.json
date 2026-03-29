@@ -6,10 +6,10 @@
   "pages": [
     "index",
     "review-week3",
+    "cloud-native",
     "docker",
     "docker-registry",
     "docker-compose",
-    "cloud-native",
     "ssh-deploy",
     "qa-discussion"
   ]
